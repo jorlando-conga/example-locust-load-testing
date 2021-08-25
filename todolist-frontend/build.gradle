@@ -1,0 +1,21 @@
+plugins {
+    id "idea"
+}
+
+apply plugin: 'base'
+
+task npmInstall(type: Exec) {
+	commandLine "npm", "install", "--no-optional"
+}
+
+task npmBuild(type: Exec) {
+	commandLine "npm", "run", "build"
+}
+
+npmBuild.dependsOn(npmInstall)
+build.dependsOn(npmBuild)
+
+task test(type: Exec) {
+	commandLine "npm", "run", "test"
+	dependsOn "npmInstall"
+}

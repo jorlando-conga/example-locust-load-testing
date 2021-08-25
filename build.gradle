@@ -1,0 +1,22 @@
+subprojects {
+    group = 'example.todolist'
+
+    // Apply defaults for all Java projects.
+    pluginManager.withPlugin("java") {
+        repositories {
+            mavenCentral()
+        }
+
+        dependencies {
+            implementation 'org.projectlombok:lombok:1.18.10'
+            annotationProcessor 'org.projectlombok:lombok:1.18.4'
+
+            implementation 'org.springframework.boot:spring-boot-starter'
+            testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        }
+
+        test {
+            useJUnitPlatform()
+        }
+    }
+}

@@ -1,0 +1,31 @@
+plugins {
+    id 'idea'
+    id 'org.springframework.boot' version '2.5.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+version '1.0.0'
+sourceCompatibility = 1.8
+
+dependencies {
+    compile project(':todolist-common')
+
+    compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.9'
+
+    // GraphQL Servlet
+    implementation ('com.graphql-java-kickstart:graphql-spring-boot-starter:7.0.1') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-web'
+    }
+
+    // Redis Caching
+    implementation 'redis.clients:jedis'
+
+    // Entity Persistence
+    implementation 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.4'
+    runtimeOnly 'org.postgresql:postgresql'
+}
+
+bootJar {
+    archiveName = 'eventservice.jar'
+}

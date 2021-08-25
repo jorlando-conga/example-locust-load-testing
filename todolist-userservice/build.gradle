@@ -1,0 +1,34 @@
+plugins {
+    id 'idea'
+    id 'org.springframework.boot' version '2.5.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+version '1.0.0'
+sourceCompatibility = 1.8
+
+dependencies {
+    compile project(':todolist-common')
+
+    // API Swagger Docs
+    compile 'io.springfox:springfox-boot-starter:3.0.0'
+    compile 'io.springfox:springfox-swagger-ui:2.9.2'
+
+    // Commons utilities
+    implementation 'commons-validator:commons-validator:1.4.1'
+
+    // Cryptography and Hashing Utilities
+    implementation 'at.favre.lib:bcrypt:0.9.0'
+
+    // Redis Caching
+    implementation 'redis.clients:jedis'
+
+    // Entity Persistence
+    implementation 'org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.4'
+    runtimeOnly 'org.postgresql:postgresql'
+}
+
+bootJar {
+    archiveName = 'userservice.jar'
+}

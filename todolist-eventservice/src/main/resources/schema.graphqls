@@ -1,0 +1,32 @@
+type Query {
+    fetchListEvents(endDate: String!): [ListEvent]
+    getEventWeather(eventId: ID!): WeatherResult
+}
+
+type Mutation {
+    upsertListEvent(eventId: ID, event: UpsertListEvent!): String
+}
+
+type ListEvent {
+    id: ID!
+    description: String
+    dueDate: String
+    zipCode: String
+    completed: Boolean
+}
+
+type WeatherResult {
+    id: ID!
+    zipCode: String
+    conditions: String
+    temperature: String
+    windSpeed: String
+    lastUpdatedAt: String
+}
+
+input UpsertListEvent {
+    description: String
+    dueDate: String
+    zipCode: String
+    completed: Boolean
+}

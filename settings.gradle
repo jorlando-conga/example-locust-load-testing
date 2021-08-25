@@ -1,0 +1,6 @@
+rootProject.name = 'ToDoList-App'
+include 'todolist-common',
+        'todolist-userservice',
+        'todolist-eventservice',
+        'todolist-frontend'
+

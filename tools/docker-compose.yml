@@ -1,0 +1,124 @@
+version: '3.3'
+
+networks:
+  todolist-dev:
+    driver: bridge
+
+services:
+  redis:
+    image: redis
+    networks:
+      - todolist-dev
+
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=todolist
+      - POSTGRES_PASSWORD=todolist
+      - POSTGRES_DB=todolist
+    networks:
+      - todolist-dev
+    volumes:
+      - ".postgres:/var/lib/postgresql/data"
+
+  userservice:
+    image: openjdk:8-jre-alpine
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.userservice.rule=PathPrefix(`/api/rest`) || PathPrefix(`/swagger-ui`)"
+      - "traefik.http.routers.userservice.entrypoints=web"
+      - "traefik.http.services.userservice.loadbalancer.server.port=80"
+      - "traefik.http.routers.userservice.service=userservice"
+    environment:
+      - PORT=80
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_SENTINEL_ENABLED=false
+      - JDBC_URL=jdbc:postgresql://postgres/todolist
+      - JDBC_USERNAME=todolist
+      - JDBC_PASSWORD=todolist
+    volumes:
+      - "../ToDoList-UserService/build/libs:/app"
+    entrypoint: [ "sh", "-c", "java -jar -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm /app/userservice.jar" ]
+    networks:
+      - todolist-dev
+    depends_on:
+      - redis
+      - postgres
+
+  eventservice:
+    image: openjdk:8-jre-alpine
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eventservice.rule=PathPrefix(`/api/data`)"
+      - "traefik.http.routers.eventservice.entrypoints=web"
+      - "traefik.http.services.eventservice.loadbalancer.server.port=80"
+      - "traefik.http.routers.eventservice.service=eventservice"
+    environment:
+      - PORT=80
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_SENTINEL_ENABLED=false
+      - JDBC_URL=jdbc:postgresql://postgres/todolist
+      - JDBC_USERNAME=todolist
+      - JDBC_PASSWORD=todolist
+      - WEATHER_API_KEY=76b5a91e96804e9090f184443212508
+    volumes:
+      - "../ToDoList-EventService/build/libs:/app"
+    entrypoint: ["sh", "-c", "java -jar -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm /app/eventservice.jar"]
+    networks:
+      - todolist-dev
+    depends_on:
+      - redis
+      - postgres
+
+  staticserver:
+    build:
+      context: ../todolist-frontend
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.staticserver.rule=!PathPrefix(`/api`) && !PathPrefix(`/swagger-ui`)"
+      - "traefik.http.routers.staticserver.entrypoints=web"
+      - "traefik.http.routers.staticserver.service=staticserver"
+      - "traefik.http.services.staticserver.loadbalancer.server.port=3000"
+    networks:
+      - todolist-dev
+
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:3000"
+      - "traefik.port=3000"
+    ports:
+      - "3000:3000"
+      - "5000:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - todolist-dev
+
+  locust-master:
+    image: locustio/locust:1.5.1
+    command: -f /mnt/locust/locustfile.py --master
+    ports:
+      - "8089:8089"
+    volumes:
+      - ../locust/src:/mnt/locust
+    networks:
+      - todolist-dev
+
+  locust-worker:
+    scale: 3
+    image: locustio/locust:1.5.1
+    command: -f /mnt/locust/locustfile.py --worker --master-host locust-master
+    volumes:
+      - ../locust/src:/mnt/locust
+    networks:
+      - todolist-dev

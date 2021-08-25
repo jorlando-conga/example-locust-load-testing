@@ -1,0 +1,10 @@
+build
+.postgres
+node_modules
+*.iml
+*.ipr
+*.iws
+.gradle
+.idea
+.DS_Store
+*.pyc

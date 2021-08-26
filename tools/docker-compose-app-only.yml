@@ -41,9 +41,7 @@ services:
       - JDBC_URL=jdbc:postgresql://postgres/todolist
       - JDBC_USERNAME=todolist
       - JDBC_PASSWORD=todolist
-    volumes:
-      - "../ToDoList-UserService/build/libs:/app"
-    entrypoint: ["java -jar -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm /app/userservice.jar" ]
+    command: ["/app/userservice.jar" ]
     networks:
       - todolist-dev
     depends_on:
@@ -69,9 +67,7 @@ services:
       - JDBC_USERNAME=todolist
       - JDBC_PASSWORD=todolist
       - WEATHER_API_KEY=76b5a91e96804e9090f184443212508
-    volumes:
-      - "../ToDoList-EventService/build/libs:/app"
-    entrypoint: ["java -jar -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm /app/eventservice.jar"]
+    command: ["/app/eventservice.jar"]
     networks:
       - todolist-dev
     depends_on:
